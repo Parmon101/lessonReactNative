@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  ActivityIndicator,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -9,31 +10,46 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+
 import {CardItem} from './src/components/CardItem';
 
-const photoData = [
-  {
-    id: 1,
-    name: 'Маргарита',
-    price: 250,
-    img: 'https://dodopizza-a.akamaihd.net/static/Img/Products/e3f5dfcb094b4c9b8200ca9f573cb2f1_366x366.webp',
-  },
-  {
-    id: 2,
-    name: 'Маргарита',
-    price: 200,
-    img: 'https://dodopizza-a.akamaihd.net/static/Img/Products/d6c9f93ea37649ac923e9586c034a5a0_366x366.webp',
-  },
-  {
-    id: 3,
-    name: 'Маргарита',
-    price: 300,
-    img: 'https://dodopizza-a.akamaihd.net/static/Img/Products/e3f5dfcb094b4c9b8200ca9f573cb2f1_366x366.webp',
-  },
-];
+interface Product {
+  id: string;
+  imageUrl: string;
+  title: string;
+  types: number[];
+  sizes: number[];
+  price: number[];
+  category: number;
+  rating: number;
+}
+
 const App: () => any = () => {
-  const [text, onChangeText] = React.useState('Useless Text');
-  const [number, onChangeNumber] = React.useState('');
+  const [isLoading, setLoading] = React.useState(true);
+  const [data, setData] = React.useState<Product[]>([]);
+
+  const [text, setText] = React.useState('');
+
+  const getProduct = async () => {
+    try {
+      const response = await fetch(
+        'https://62921194cd0c91932b6ccbee.mockapi.io/moroz',
+      );
+      const json = await response.json();
+
+      setData(json);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  console.log(data);
+
+  React.useEffect(() => {
+    getProduct();
+  }, []);
 
   return (
     <SafeAreaView style={{flex: 1}}>
@@ -41,37 +57,40 @@ const App: () => any = () => {
         backgroundColor="#000"
         barStyle={false ? 'light-content' : 'dark-content'}
       />
-      {/* <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        // style={backgroundStyle}
-      > */}
       <ScrollView style={s.container}>
         <Text style={s.view}>Магазин пиццы</Text>
         <Text>Описание {'\n'} 2 строки</Text>
 
         <View>
-          <TextInput style={s.input} keyboardType="numeric" />
-          {/* <SearchIcon /> */}
+          <TextInput
+            style={s.input}
+            keyboardType="numeric"
+            onChangeText={(event: string) => setText(event)}
+            value={text}
+          />
         </View>
 
-        <View style={s.imageContainer}>
-          {photoData.map(element => {
-            return (
-              <CardItem
-                key={element.id}
-                text={element.name}
-                img={element.img}
-                price={element.price}
-              />
-            );
-          })}
-        </View>
+        {isLoading ? (
+          <ActivityIndicator style={{marginTop: 12}} />
+        ) : (
+          <View style={s.imageContainer}>
+            {data.map(element => {
+              return (
+                <CardItem
+                  key={element.id}
+                  text={element.title}
+                  img={element.imageUrl}
+                  price={element.price[1]}
+                />
+              );
+            })}
+          </View>
+        )}
 
         <TouchableOpacity style={s.orderBttnContainer}>
           <Text style={s.orderBtnText}>Создать заказ</Text>
         </TouchableOpacity>
       </ScrollView>
-      {/* </ScrollView> */}
     </SafeAreaView>
   );
 };

@@ -2,8 +2,6 @@ import * as React from 'react';
 import {Alert, Image, StyleSheet, Text, TouchableOpacity} from 'react-native';
 
 export const CardItem = ({text, img, price}) => {
-  console.log(img);
-
   return (
     <TouchableOpacity
       onPress={() => Alert.alert('Вы выбрали', text)}
